@@ -1,0 +1,44 @@
+name: Build ISO
+
+on:
+  workflow_dispatch:
+    inputs:
+      perfil:
+        description: "Perfil da ISO"
+        required: true
+        default: ultralight
+        type: choice
+        options:
+          - ultralight
+          - standard
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: debian:trixie
+      options: --privileged
+    steps:
+      - name: Instalar ferramentas
+        run: |
+          apt-get update
+          apt-get install -y git live-build debootstrap xorriso squashfs-tools ca-certificates
+
+      - uses: actions/checkout@v4
+
+      - name: Construir ISO
+        run: bash scripts/build-iso.sh "${{ github.event.inputs.perfil }}"
+
+      - name: Gerar checksum
+        run: cd iso && sha256sum *.iso > SHA256SUMS.txt
+
+      - name: Publicar resultado
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nexus-os-${{ github.event.inputs.perfil }}
+          path: |
+            iso/*.iso
+            iso/SHA256SUMS.txt
+            build/*/build.log
+          if-no-files-found: warn
