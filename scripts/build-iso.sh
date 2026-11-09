@@ -18,7 +18,7 @@ lb config \
   --architectures amd64 \
   --archive-areas "main contrib non-free-firmware" \
   --security true \
-  --apt-recommends false \
+  --apt-recommends true \
   --debian-installer none \
   --binary-images iso-hybrid \
   --iso-application "NEXUS OS" \
